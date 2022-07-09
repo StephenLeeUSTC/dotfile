@@ -25,19 +25,30 @@ endif
 
 call plug#begin(expand('~/.config/nvim/plugged'))
 
-Plug 'nvim-lualine/lualine.nvim'
 Plug 'kyazdani42/nvim-web-devicons'
+Plug 'nvim-lualine/lualine.nvim'
+Plug 'moll/vim-bbye' "used for close buffer
+Plug 'akinsho/bufferline.nvim', { 'tag': 'v2.*' }
 
-Plug 'preservim/nerdtree'
+Plug 'kyazdani42/nvim-tree.lua'
 Plug 'terryma/vim-multiple-cursors' " use ctrl + n
 Plug 'numToStr/Comment.nvim'
-Plug 'nvim-telescope/telescope.nvim'
+
+" reminder for complex keybindings
+Plug 'folke/which-key.nvim'
+
+" telescope related plugin
 Plug 'ahmedkhalf/project.nvim'
+Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-treesitter/nvim-treesitter'
+Plug 'nvim-telescope/telescope.nvim'
+
 Plug 'windwp/nvim-autopairs'
 Plug 'Mofiqul/vscode.nvim' " colorscheme
 Plug 'phaazon/hop.nvim'
 
 " Semantic language support
+Plug 'williamboman/nvim-lsp-installer'
 Plug 'neovim/nvim-lspconfig'
 Plug 'nvim-lua/lsp_extensions.nvim'
 Plug 'hrsh7th/cmp-nvim-lsp', {'branch': 'main'}
@@ -76,10 +87,11 @@ au FocusGained,BufEnter * checktime
 
 " With a map leader it's possible to do extra key combinations
 " like <leader>w saves the current file
-let mapleader = ","
+" leader changed to space
+let mapleader = " "
 
 " Fast saving
-nmap <leader>w :w!<cr>
+" nmap <leader>w :w!<cr>
 
 " :W sudo saves the file
 " (useful for handling the permission-denied error)
@@ -92,10 +104,6 @@ set shiftwidth=2
 set smarttab
 set softtabstop=2
 set mouse=a
-
-"" Open current line on GitHub
-nnoremap <Leader>o :.Gbrowse<CR>
-
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => VIM user interface
@@ -161,7 +169,7 @@ set mat=2
 set noerrorbells
 set novisualbell
 set t_vb=
-set tm=500
+set timeoutlen=500
 
 " Properly disable sound on errors on MacVim
 if has("gui_macvim")
@@ -195,13 +203,22 @@ EOF
 map <silent> <leader><cr> :noh<cr>
 
 " Smart way to move between windows
-map <C-j> <C-W>j
-map <C-k> <C-W>k
-map <C-h> <C-W>h
-map <C-l> <C-W>l
+" map <leader>wj <C-W>j
+" map <leader>wk <C-W>k
+" map <leader>wh <C-W>h
+" map <leader>wl <C-W>l
 
 " Must have config
 inoremap jk <Esc>
+
+" close current buffer
+" nmap <leader>bd :Bdelete!<cr>
+
+" buffer next or previous
+" lua << EOF
+" vim.keymap.set("n", "<leader>bp", ":BufferLineCyclePrev<CR>", opt)
+" vim.keymap.set("n", "<leader>bn", ":BufferLineCycleNext<CR>", opt)
+" EOF
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Colors and Themes
@@ -219,10 +236,41 @@ colorscheme vscode
 lua << EOF
 require("lualine").setup({
     options = {
-        -- ...
         theme = "vscode",
-        -- ...
+				component_separators = { left = "|", right = "|" },
+				-- https://github.com/ryanoasis/powerline-extra-symbols
+				section_separators = { left = " ", right = "" },
     },
+})
+
+-- https://github.com/akinsho/bufferline.nvim#configuration
+require("bufferline").setup({
+  options = {
+    -- 关闭 Tab 的命令，这里使用 moll/vim-bbye 的 :Bdelete 命令
+    close_command = "Bdelete! %d",
+    right_mouse_command = "Bdelete! %d",
+    -- 侧边栏配置
+    -- 左侧让出 nvim-tree 的位置，显示文字 File Explorer
+    offsets = {
+      {
+        filetype = "NvimTree",
+        text = "File Explorer",
+        highlight = "Directory",
+        text_align = "left",
+      },
+    },
+    diagnostics = "nvim_lsp",
+    -- 可选，显示 LSP 报错图标
+    ---@diagnostic disable-next-line: unused-local
+    diagnostics_indicator = function(count, level, diagnostics_dict, context)
+      local s = " "
+      for e, n in pairs(diagnostics_dict) do
+        local sym = e == "error" and " " or (e == "warning" and " " or "")
+        s = s .. n .. sym
+      end
+      return s
+    end,
+  },
 })
 EOF
 
@@ -235,17 +283,129 @@ set fileencodings=utf-8
 set ffs=unix,dos,mac
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" => Nerd Tree
+" => Vim Tree
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let g:NERDTreeWinPos = "left"
-let NERDTreeShowHidden=0
-let NERDTreeIgnore = ['\.pyc$', '__pycache__']
-let g:NERDTreeWinSize=35
-let g:NERDTreeDirArrowExpandable='+'
-let g:NERDTreeDirArrowCollapsible='~'
-map <leader>nn :NERDTreeToggle<cr>
-map <leader>nb :NERDTreeFromBookmark<Space>
-map <leader>nf :NERDTreeFind<cr>
+lua << EOF
+local nvim_tree = require("nvim-tree")
+
+nvim_tree.setup({
+  auto_reload_on_write = true,
+  disable_netrw = false,
+  hijack_cursor = false,
+  hijack_netrw = true,
+  hijack_unnamed_buffer_when_opening = false,
+  ignore_buffer_on_setup = false,
+  open_on_setup = false,
+  open_on_setup_file = false,
+  open_on_tab = false,
+  sort_by = "name",
+  update_cwd = false,
+  view = {
+    width = 30,
+    height = 30,
+    hide_root_folder = false,
+    side = "left",
+    preserve_window_proportions = false,
+    number = false,
+    relativenumber = false,
+    signcolumn = "yes",
+    mappings = {
+      custom_only = false,
+      list = {
+        -- user mappings go here
+      },
+    },
+  },
+  renderer = {
+    indent_markers = {
+      enable = false,
+      icons = {
+        corner = "└ ",
+        edge = "│ ",
+        none = "  ",
+      },
+    },
+    icons = {
+      webdev_colors = true,
+    },
+  },
+  hijack_directories = {
+    enable = true,
+    auto_open = true,
+  },
+  update_focused_file = {
+    enable = false,
+    update_cwd = false,
+    ignore_list = {},
+  },
+  ignore_ft_on_setup = {},
+  system_open = {
+    cmd = "",
+    args = {},
+  },
+  diagnostics = {
+    enable = false,
+    show_on_dirs = false,
+    icons = {
+      hint = "",
+      info = "",
+      warning = "",
+      error = "",
+    },
+  },
+  filters = {
+    dotfiles = false,
+    custom = {},
+    exclude = {},
+  },
+  git = {
+    enable = true,
+    ignore = true,
+    timeout = 400,
+  },
+  actions = {
+    use_system_clipboard = true,
+    change_dir = {
+      enable = true,
+      global = false,
+      restrict_above_cwd = false,
+    },
+    open_file = {
+      quit_on_open = false,
+      resize_window = false,
+      window_picker = {
+        enable = true,
+        chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+        exclude = {
+          filetype = { "notify", "packer", "qf", "diff", "fugitive", "fugitiveblame" },
+          buftype = { "nofile", "terminal", "help" },
+        },
+      },
+    },
+  },
+  trash = {
+    cmd = "trash",
+    require_confirm = true,
+  },
+  log = {
+    enable = false,
+    truncate = false,
+    types = {
+      all = false,
+      config = false,
+      copy_paste = false,
+      diagnostics = false,
+      git = false,
+      profile = false,
+    },
+  },
+})
+
+-- vim.keymap.set('n', '<leader>nn', function()
+--   return require('nvim-tree').toggle(false, true)
+-- end,
+-- { noremap = true, silent = true, desc = "toggle nvim-tree"})
+EOF
 
 
 "*****************************************************************************
@@ -253,6 +413,7 @@ map <leader>nf :NERDTreeFind<cr>
 "*****************************************************************************
 " remove trailing whitespaces
 command! FixWhitespace :%s/\s\+$//e
+" nmap <leader>m :FixWhitespace<CR>
 
 "=================================================================================
 "
@@ -326,23 +487,36 @@ require("project_nvim").setup {
 require('telescope').load_extension('projects')
 EOF
 " Find files using Telescope command-line sugar.
-nnoremap <leader>ff <cmd>Telescope find_files<cr>
-nnoremap <leader>fg <cmd>Telescope live_grep<cr>
-nnoremap <leader>fb <cmd>Telescope buffers<cr>
-nnoremap <leader>fh <cmd>Telescope help_tags<cr>
-nnoremap <leader>fp <cmd>Telescope projects<cr>
+" nnoremap <leader>ff <cmd>Telescope find_files<cr>
+" nnoremap <leader>fg <cmd>Telescope live_grep<cr>
+" nnoremap <leader>fr <cmd>Telescope oldfiles<cr>
+" nnoremap <leader>fh <cmd>Telescope help_tags<cr>
+"
+" nnoremap <leader>pp <cmd>Telescope projects<cr>
+"
+"
+" nnoremap <leader>bb <cmd>Telescope buffers<cr>
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => LSP settings
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let g:vsnip_snippet_dir = expand('~/.config/nvim/vscode-snippets/')
+
 lua << EOF
+require("nvim-lsp-installer").setup(
+	{
+    automatic_installation = true, -- automatically detect which servers to install (based on which servers are set up via lspconfig)
+    ui = {
+        icons = {
+            server_installed = "✓",
+            server_pending = "➜",
+            server_uninstalled = "✗"
+        }
+    }
+})
+
 -- Mappings.
--- See `:help vim.diagnostic.*` for documentation on any of the below functions
 local opts = { noremap=true, silent=true }
-vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
-vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
-vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
-vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, opts)
 
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
@@ -353,21 +527,21 @@ local on_attach = function(client, bufnr)
   -- Mappings.
   -- See `:help vim.lsp.*` for documentation on any of the below functions
   local bufopts = { noremap=true, silent=true, buffer=bufnr }
-  vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
-  vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
+	vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
+	vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
   vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
   vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts)
   vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, bufopts)
-  vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, bufopts)
-  vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, bufopts)
-  vim.keymap.set('n', '<space>wl', function()
-    print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-  end, bufopts)
-  vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts)
-  vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts)
-  vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
+  vim.keymap.set('n', '<leader>wa', vim.lsp.buf.add_workspace_folder, bufopts)
+  vim.keymap.set('n', '<leader>wr', vim.lsp.buf.remove_workspace_folder, bufopts)
+--   vim.keymap.set('n', '<Leader>wl', function()
+--     print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+--   end, bufopts)
+  vim.keymap.set('n', '<leader>D', vim.lsp.buf.type_definition, bufopts)
+--   vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, bufopts)
+--   vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, bufopts)
   vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
-  vim.keymap.set('n', '<space>f', vim.lsp.buf.formatting, bufopts)
+  vim.keymap.set('n', '<leader>fc', vim.lsp.buf.formatting, bufopts)
 end
 
 local lsp_flags = {
@@ -445,7 +619,6 @@ EOF
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => hop settings
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 lua << EOF
 vim.cmd[[ hi HopNextKey cterm=bold ctermfg=176 gui=bold guibg=#ff00ff guifg=#ffffff ]]
 vim.cmd[[ hi HopNextKey1 cterm=bold ctermfg=176 gui=bold guibg=#ff00ff guifg=#ffffff ]]
@@ -463,14 +636,168 @@ end,
 { silent = true, noremap = true, desc = "nvim-hop char2" })
 EOF
 
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" => search
+" => which-key settings
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" from http://sheerun.net/2014/03/21/how-to-boost-your-vim-productivity/
-if executable('ag')
-	set grepprg=ag\ --nogroup\ --nocolor
-endif
-if executable('rg')
-	set grepprg=rg\ --no-heading\ --vimgrep
-	set grepformat=%f:%l:%c:%m
-endif
+lua << EOF
+local wk = require("which-key")
+
+wk.setup {
+	plugins = {
+		marks = true, -- shows a list of your marks on ' and `
+		registers = true, -- shows your registers on " in NORMAL or <C-r> in INSERT mode
+		-- the presets plugin, adds help for a bunch of default keybindings in Neovim
+		-- No actual key bindings are created
+		presets = {
+			operators = false, -- adds help for operators like d, y, ...
+			motions = false, -- adds help for motions
+			text_objects = false, -- help for text objects triggered after entering an operator
+			windows = false, -- default bindings on <c-w>
+			nav = true, -- misc bindings to work with windows
+			z = true, -- bindings for folds, spelling and others prefixed with z
+			g = true, -- bindings for prefixed with g
+			},
+		spelling = { enabled = true, suggestions = 20 }, -- use which-key for spelling hints
+		},
+	icons = {
+		breadcrumb = "?", -- symbol used in the command line area that shows your active key combo
+		separator = "?", -- symbol used between a key and it's label
+		group = "+", -- symbol prepended to a group
+		},
+	popup_mappings = {
+		scroll_down = "<c-d>", -- binding to scroll down inside the popup
+		scroll_up = "<c-u>", -- binding to scroll up inside the popup
+		},
+	window = {
+		border = "single", -- none, single, double, shadow
+		position = "bottom", -- bottom, top
+		margin = { 1, 0, 1, 0 }, -- extra window margin [top, right, bottom, left]
+		padding = { 2, 2, 2, 2 }, -- extra window padding [top, right, bottom, left]
+		winblend = 0,
+		},
+	layout = {
+		height = { min = 4, max = 25 }, -- min and max height of the columns
+		width = { min = 20, max = 50 }, -- min and max width of the columns
+		spacing = 3, -- spacing between columns
+		align = "left", -- align columns left, center or right
+		},
+	hidden = { "<silent>", "<cmd>", "<Cmd>", "<CR>", "call", "lua", "^:", "^ " }, -- hide mapping boilerplate
+	ignore_missing = false, -- enable this to hide mappings for which you didn't specify a label
+	show_help = true, -- show help message on the command line when the popup is visible
+	triggers = "auto", -- automatically setup triggers
+	-- triggers = {"<leader>"} -- or specify a list manually
+	triggers_blacklist = {
+		-- list of mode / prefixes that should never be hooked by WhichKey
+		-- this is mostly relevant for key maps that start with a native binding
+		-- most people should not need to change this
+		i = { "j", "k" },
+		v = { "j", "k" },
+		},
+	}
+
+opts = {
+	mode = "n", -- NORMAL mode
+	prefix = "<leader>",
+	buffer = nil, -- Global mappings. Specify a buffer number for buffer local mappings
+	silent = true, -- use `silent` when creating keymaps
+	noremap = true, -- use `noremap` when creating keymaps
+	nowait = true, -- use `nowait` when creating keymaps
+	}
+
+vopts = {
+	mode = "v", -- VISUAL mode
+	prefix = "<leader>",
+	buffer = nil, -- Global mappings. Specify a buffer number for buffer local mappings
+	silent = true, -- use `silent` when creating keymaps
+	noremap = true, -- use `noremap` when creating keymaps
+	nowait = true, -- use `nowait` when creating keymaps
+	}
+
+-- NOTE: Prefer using : over <cmd> as the latter avoids going back in normal-mode.
+-- see https://neovim.io/doc/user/map.html#:map-cmd
+vmappings = {
+	["/"] = { "<ESC><CMD>lua require('Comment.api').toggle_linewise_op(vim.fn.visualmode())<CR>", "Comment" },
+	}
+
+mappings = {
+	["W"] = { "<cmd>w!<CR>", "Save" },
+	["/"] = { "<cmd>lua require('Comment.api').toggle_current_linewise()<CR>", "Comment" },
+	["h"] = { "<cmd>nohlsearch<CR>", "No Highlight" },
+	["m"] = { "<cmd>FixWhitespace<cr>", "Remove trailing space"},
+	c = {
+		name = "Code",
+		c = { "<cmd>call CompileRun()<cr>", "CompileRun" },
+		},
+	w = {
+		name = "Windows",
+		j = {"<cmd>wincmd j<CR>", "window down"},
+		k = {"<cmd>wincmd k<CR>", "window up"},
+		h = {"<cmd>wincmd h<CR>", "window left"},
+		l = {"<cmd>wincmd l<CR>", "window right"},
+		},
+	b = {
+		name = "Buffers",
+		j = { "<cmd>BufferLinePick<cr>", "Jump" },
+		f = { "<cmd>Telescope buffers<cr>", "Find" },
+		b = { "<cmd>BufferLineCyclePrev<cr>", "Previous" },
+		d = { "<cmd>Bdelete!<cr>", "Close Buffer" },
+		e = {
+			"<cmd>BufferLinePickClose<cr>",
+			"Pick which buffer to close",
+			},
+		D = {
+			"<cmd>BufferLineSortByDirectory<cr>",
+			"Sort by directory",
+			},
+		L = {
+			"<cmd>BufferLineSortByExtension<cr>",
+			"Sort by language",
+			},
+		},
+	l = {
+		name = "LSP",
+		a = { "<cmd>lua vim.lsp.buf.code_action()<cr>", "Code Action" },
+		d = { "<cmd>Telescope diagnostics bufnr=0 theme=get_ivy<cr>", "Buffer Diagnostics" },
+		w = { "<cmd>Telescope diagnostics<cr>", "Diagnostics" },
+		i = { "<cmd>LspInfo<cr>", "Info" },
+		I = { "<cmd>LspInstallInfo<cr>", "Installer Info" },
+		j = { vim.diagnostic.goto_next, "Next Diagnostic", },
+		k = { vim.diagnostic.goto_prev, "Prev Diagnostic", },
+		l = { vim.lsp.codelens.run, "CodeLens Action" },
+		q = { vim.diagnostic.setloclist, "Quickfix" },
+		r = { vim.lsp.buf.rename, "Rename" },
+		s = { "<cmd>Telescope lsp_document_symbols<cr>", "Document Symbols" },
+		S = {
+			"<cmd>Telescope lsp_dynamic_workspace_symbols<cr>",
+			"Workspace Symbols",
+			},
+		e = { "<cmd>Telescope quickfix<cr>", "Telescope Quickfix" },
+		},
+	f = {
+		name = "Search",
+		f = { "<cmd>Telescope find_files<cr>", "Find File" },
+		r = { "<cmd>Telescope oldfiles<cr>", "Open Recent File" },
+		t = { "<cmd>NvimTreeToggle<CR>", "File tree"},
+		},
+	s = {
+		name = "Search",
+		t = { "<cmd>Telescope live_grep<cr>", "Text" },
+		b = { "<cmd>Telescope git_branches<cr>", "Checkout branch" },
+		R = { "<cmd>Telescope registers<cr>", "Registers" },
+		k = { "<cmd>Telescope keymaps<cr>", "Keymaps" },
+		C = { "<cmd>Telescope commands<cr>", "Commands" },
+		},
+	p = {
+		name = "Project",
+		p = { "<cmd>Telescope projects<cr>", "Find Project"},
+		},
+	T = {
+		name = "Treesitter",
+		i = { ":TSConfigInfo<cr>", "Info" },
+		},
+	}
+
+wk.register(mappings, opts)
+wk.register(vmappings, vopts)
+EOF
