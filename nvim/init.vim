@@ -187,7 +187,6 @@ set nobackup
 set nowb
 set noswapfile
 
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Parenthesis/bracket
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -195,24 +194,20 @@ lua << EOF
 require("nvim-autopairs").setup {}
 EOF
 
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Moving around, tabs, windows and buffers
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Disable highlight when <leader><cr> is pressed
-map <silent> <leader><cr> :noh<cr>
+" map <silent> <leader><cr> :noh<cr>
 
 " Smart way to move between windows
-" map <leader>wj <C-W>j
-" map <leader>wk <C-W>k
-" map <leader>wh <C-W>h
-" map <leader>wl <C-W>l
+map <C-j> <C-W>j
+map <C-k> <C-W>k
+map <C-h> <C-W>h
+map <C-l> <C-W>l
 
 " Must have config
 inoremap jk <Esc>
-
-" close current buffer
-" nmap <leader>bd :Bdelete!<cr>
 
 " buffer next or previous
 " lua << EOF
@@ -486,15 +481,16 @@ require("project_nvim").setup {
 	}
 require('telescope').load_extension('projects')
 EOF
+
 " Find files using Telescope command-line sugar.
 " nnoremap <leader>ff <cmd>Telescope find_files<cr>
 " nnoremap <leader>fg <cmd>Telescope live_grep<cr>
 " nnoremap <leader>fr <cmd>Telescope oldfiles<cr>
 " nnoremap <leader>fh <cmd>Telescope help_tags<cr>
-"
+
 " nnoremap <leader>pp <cmd>Telescope projects<cr>
-"
-"
+
+
 " nnoremap <leader>bb <cmd>Telescope buffers<cr>
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -534,14 +530,14 @@ local on_attach = function(client, bufnr)
   vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, bufopts)
   vim.keymap.set('n', '<leader>wa', vim.lsp.buf.add_workspace_folder, bufopts)
   vim.keymap.set('n', '<leader>wr', vim.lsp.buf.remove_workspace_folder, bufopts)
+  vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
 --   vim.keymap.set('n', '<Leader>wl', function()
 --     print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
 --   end, bufopts)
-  vim.keymap.set('n', '<leader>D', vim.lsp.buf.type_definition, bufopts)
+--   vim.keymap.set('n', '<leader>D', vim.lsp.buf.type_definition, bufopts)
 --   vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, bufopts)
 --   vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, bufopts)
-  vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
-  vim.keymap.set('n', '<leader>fc', vim.lsp.buf.formatting, bufopts)
+--   vim.keymap.set('n', '<leader>fc', vim.lsp.buf.formatting, bufopts)
 end
 
 local lsp_flags = {
@@ -728,6 +724,7 @@ mappings = {
 	c = {
 		name = "Code",
 		c = { "<cmd>call CompileRun()<cr>", "CompileRun" },
+		f = { vim.lsp.buf.formatting, "Formatting code"},
 		},
 	w = {
 		name = "Windows",
@@ -759,6 +756,7 @@ mappings = {
 		name = "LSP",
 		a = { "<cmd>lua vim.lsp.buf.code_action()<cr>", "Code Action" },
 		d = { "<cmd>Telescope diagnostics bufnr=0 theme=get_ivy<cr>", "Buffer Diagnostics" },
+		D = { vim.lsp.buf.type_definition, "Type Definition"},
 		w = { "<cmd>Telescope diagnostics<cr>", "Diagnostics" },
 		i = { "<cmd>LspInfo<cr>", "Info" },
 		I = { "<cmd>LspInstallInfo<cr>", "Installer Info" },

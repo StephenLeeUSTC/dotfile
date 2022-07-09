@@ -1,3 +1,5 @@
+" simple config for vim, no plugin
+
 syntax on
 set tabstop=2
 set shiftwidth=2
