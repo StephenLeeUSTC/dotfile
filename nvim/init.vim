@@ -561,6 +561,29 @@ for _, lsp in ipairs(servers) do
   }
 end
 
+-- config diagnostics
+local diagnostic_config = {
+	-- disable virtual text
+	virtual_text = false,
+	-- show signs
+	signs = {
+		active = signs,
+		},
+	update_in_insert = true,
+	underline = true,
+	severity_sort = true,
+	float = {
+		focusable = false,
+		style = "minimal",
+		border = "rounded",
+		source = "always",
+		header = "",
+		prefix = "",
+		},
+	}
+
+vim.diagnostic.config(diagnostic_config)
+
 
 -- nvim-cmp setup
 local has_words_before = function()
@@ -773,7 +796,7 @@ mappings = {
 		e = { "<cmd>Telescope quickfix<cr>", "Telescope Quickfix" },
 		},
 	f = {
-		name = "Search",
+		name = "File",
 		f = { "<cmd>Telescope find_files<cr>", "Find File" },
 		r = { "<cmd>Telescope oldfiles<cr>", "Open Recent File" },
 		t = { "<cmd>NvimTreeToggle<CR>", "File tree"},
