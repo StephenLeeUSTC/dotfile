@@ -18,7 +18,6 @@ null_ls.setup {
     -- },
     formatting.black.with { extra_args = { "--fast" } },
     formatting.stylua,
-    formatting.clang_format,
     -- formatting.google_java_format,
     diagnostics.flake8,
   },
