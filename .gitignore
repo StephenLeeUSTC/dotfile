@@ -45,5 +45,6 @@ luac.out
 
 
 plugin/packer_compiled.lua
+plugin
 java-debug/
 vscode-java-test/
