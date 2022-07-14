@@ -4,7 +4,6 @@ local keymap = vim.keymap.set
 local opts = { silent = true }
 
 --Remap space as leader key
-keymap("", "<Space>", "<Nop>", opts)
 vim.g.mapleader = " "
 
 -- Modes
@@ -53,20 +52,16 @@ keymap("v", ">", ">gv", opts)
 -- Plugins --
 
 -- NvimTree
-keymap("n", "<leader>ft", ":NvimTreeToggle<CR>", opts)
+keymap("n", "<leader>ft", "<cmd>NvimTreeToggle<CR>", opts)
 
 -- Telescope
-keymap("n", "<leader>ff", ":Telescope find_files<CR>", opts)
-keymap("n", "<leader>tt", ":Telescope live_grep<CR>", opts)
-keymap("n", "<leader>pp", ":Telescope projects<CR>", opts)
-keymap("n", "<leader>bf", ":Telescope buffers<CR>", opts)
+keymap("n", "<leader>ff", "<cmd>Telescope find_files<cr>", opts)
+keymap("n", "<leader>tt", "<cmd>Telescope live_grep<cr>", opts)
+keymap("n", "<leader>pp", "<cmd>Telescope projects<cr>", opts)
+keymap("n", "<leader>bf", "<cmd>Telescope buffers<CR>", opts)
 
 -- Git
 keymap("n", "<leader>gg", "<cmd>lua _LAZYGIT_TOGGLE()<CR>", opts)
-
--- Comment
-keymap("n", "<leader>/", "<cmd>lua require('Comment.api').toggle_current_linewise()<CR>", opts)
-keymap("x", "<leader>/", '<ESC><CMD>lua require("Comment.api").toggle_linewise_op(vim.fn.visualmode())<CR>')
 
 -- DAP
 keymap("n", "<leader>db", "<cmd>lua require'dap'.toggle_breakpoint()<cr>", opts)

@@ -76,13 +76,10 @@ local vopts = {
 
 -- NOTE: Prefer using : over <cmd> as the latter avoids going back in normal-mode.
 -- see https://neovim.io/doc/user/map.html#:map-cmd
-local vmappings = {
-	["/"] = { "<ESC><CMD>lua require('Comment.api').toggle_linewise_op(vim.fn.visualmode())<CR>", "Comment" },
-	}
+local vmappings = { }
 
 local mappings = {
 	["W"] = { "<cmd>w!<CR>", "Save" },
-	["/"] = { "<cmd>lua require('Comment.api').toggle_current_linewise()<CR>", "Comment" },
 	["h"] = { "<cmd>nohlsearch<CR>", "No Highlight" },
 	["m"] = { "<cmd>FixWhitespace<cr>", "Remove trailing space"},
 	c = {
@@ -99,10 +96,10 @@ local mappings = {
 		},
 	b = {
 		name = "Buffers",
-		j = { "<cmd>BufferLinePick<cr>", "Jump" },
-		f = { "<cmd>Telescope buffers<cr>", "Find" },
-		b = { "<cmd>BufferLineCyclePrev<cr>", "Previous" },
-		d = { "<cmd>Bdelete!<cr>", "Close Buffer" },
+		j = { "<cmd>BufferLinePick<CR>", "Jump" },
+		f = { "<cmd>Telescope buffers<CR>", "Find" },
+		b = { "<cmd>BufferLineCyclePrev<CR>", "Previous" },
+		d = { "<cmd>Bdelete!<CR>", "Close Buffer" },
 		e = {
 			"<cmd>BufferLinePickClose<cr>",
 			"Pick which buffer to close",
@@ -152,7 +149,7 @@ local mappings = {
 		k = { "<cmd>Telescope keymaps<cr>", "Keymaps" },
 		C = { "<cmd>Telescope commands<cr>", "Commands" },
 		},
-  g = {
+  G = {
     name = "Git",
 		b = { "<cmd>Telescope git_branches<cr>", "Checkout branch" },
   },
