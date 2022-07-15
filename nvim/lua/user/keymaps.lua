@@ -6,16 +6,6 @@ local opts = { silent = true }
 --Remap space as leader key
 vim.g.mapleader = " "
 
-
-function CompileRun()
-  local filetype = vim.bo.filetype
-  vim.cmd('w')
-  if filetype == 'cpp' then
-    vim.cmd("!g++ -std=c++11 % -o %<")
-    vim.cmd("!time ./%<")
-  end
-end
-
 -- Modes
 --   normal_mode = "n",
 --   insert_mode = "i",
@@ -70,5 +60,3 @@ keymap("n", "<leader>tt", "<cmd>Telescope live_grep<cr>", opts)
 keymap("n", "<leader>pp", "<cmd>Telescope projects<cr>", opts)
 keymap("n", "<leader>bf", "<cmd>Telescope buffers<CR>", opts)
 
--- CompileRun
-keymap("n", "<leader>cc", "<cmd>lua CompileRun()<cr>", opts)

@@ -84,7 +84,7 @@ local mappings = {
 	["m"] = { "<cmd>FixWhitespace<cr>", "Remove trailing space"},
 	c = {
 		name = "Code",
-		c = { "<cmd>call CompileRun()<cr>", "CompileRun" },
+		c = { [[<cmd>lua require("user.utils").compile_run()<cr>]], "CompileRun" },
 		f = { vim.lsp.buf.formatting, "Formatting code"},
 		},
 	w = {
