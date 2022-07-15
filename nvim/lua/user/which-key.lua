@@ -143,6 +143,9 @@ local mappings = {
     name = "Text",
 		t = { "<cmd>Telescope live_grep<cr>", "Text" },
   },
+  d = {
+    name = "Debugger",
+  },
 	s = {
 		name = "Search",
 		R = { "<cmd>Telescope registers<cr>", "Registers" },
