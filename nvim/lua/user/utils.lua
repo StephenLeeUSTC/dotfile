@@ -6,6 +6,11 @@ function M.compile_run()
   if filetype == 'cpp' then
     vim.cmd("!g++ -std=c++11 % -o %<")
     vim.cmd("!time ./%<")
+  elseif filetype == 'c' then
+    vim.cmd("!gcc % -o %<")
+    vim.cmd("!time ./%<")
+  elseif filetype == 'python' then
+    vim.cmd("!time python3 %")
   end
 end
 

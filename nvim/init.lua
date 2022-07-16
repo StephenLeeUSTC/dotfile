@@ -1,9 +1,11 @@
+-- common settings
 require "user.options"
 require "user.keymaps"
+
+-- plugin related
 require "user.plugins"
 require "user.autocommands"
 require "user.colorscheme"
-require "user.cmp"
 require "user.telescope"
 require "user.treesitter"
 require "user.autopairs"
@@ -18,5 +20,9 @@ require "user.impatient"
 require "user.illuminate"
 require "user.indentline"
 require "user.alpha"
-require "user.lsp"
 require "user.hop"
+
+-- lsp
+require "user.lsp"
+require "user.cmp"
+

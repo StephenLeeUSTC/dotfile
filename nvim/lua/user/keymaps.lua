@@ -4,6 +4,7 @@ local keymap = vim.keymap.set
 local opts = { silent = true }
 
 --Remap space as leader key
+keymap("", "<Space>", "<Nop>", opts)
 vim.g.mapleader = " "
 
 -- Modes
@@ -56,12 +57,13 @@ keymap("n", "<leader>nn", "<cmd>NvimTreeToggle<CR>", opts)
 
 -- Telescope
 keymap("n", "<leader>ff", "<cmd>Telescope find_files<cr>", opts)
+keymap("n", "<Leader>fr", ":Telescope oldfiles<CR>", { noremap = true, silent = true })
 keymap("n", "<leader>tt", "<cmd>Telescope live_grep<cr>", opts)
 keymap("n", "<leader>pp", "<cmd>Telescope projects<cr>", opts)
 keymap("n", "<leader>bf", "<cmd>Telescope buffers<CR>", opts)
 
 -- Hop
-keymap('n', 'f', function()
+keymap('n', 's', function()
   return require('hop').hint_char2()
 end,
   {silent = true, noremap = true, desc = 'nvim-hop char2'})
