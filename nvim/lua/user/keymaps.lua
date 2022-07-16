@@ -28,8 +28,8 @@ keymap("n", "<C-Left>", ":vertical resize -2<CR>", opts)
 keymap("n", "<C-Right>", ":vertical resize +2<CR>", opts)
 
 -- Navigate buffers
-keymap("n", "<leader>bn", ":bnext<CR>", opts)
-keymap("n", "<leader>bp", ":bprevious<CR>", opts)
+keymap("n", "<leader>l", ":bnext<CR>", opts)
+keymap("n", "<leader>h", ":bprevious<CR>", opts)
 
 -- Clear highlights
 keymap("n", "<leader>h", "<cmd>nohlsearch<CR>", opts)
@@ -52,11 +52,40 @@ keymap("v", ">", ">gv", opts)
 -- Plugins --
 
 -- NvimTree
-keymap("n", "<leader>ft", "<cmd>NvimTreeToggle<CR>", opts)
+keymap("n", "<leader>nn", "<cmd>NvimTreeToggle<CR>", opts)
 
 -- Telescope
 keymap("n", "<leader>ff", "<cmd>Telescope find_files<cr>", opts)
 keymap("n", "<leader>tt", "<cmd>Telescope live_grep<cr>", opts)
 keymap("n", "<leader>pp", "<cmd>Telescope projects<cr>", opts)
 keymap("n", "<leader>bf", "<cmd>Telescope buffers<CR>", opts)
+
+-- Hop
+keymap('n', 'f', function()
+  return require('hop').hint_char2()
+end,
+  {silent = true, noremap = true, desc = 'nvim-hop char2'})
+
+-- Git
+keymap("n", "<leader>gg", "<cmd>lua _LAZYGIT_TOGGLE()<CR>", opts)
+
+-- Comment
+keymap("n", "<leader>/", "<cmd>lua require('Comment.api').toggle_current_linewise()<CR>", opts)
+keymap("x", "<leader>/", '<ESC><CMD>lua require("Comment.api").toggle_linewise_op(vim.fn.visualmode())<CR>')
+
+-- Better paste
+keymap("v", "p", '"_dP', opts)
+
+-- compile and run 
+keymap('n', '<leader>cr', [[<cmd>lua require("user.utils").compile_run()<cr>]], opts)
+
+-- visual mode mappings
+-- keymap('v', '*', [[:call VisualSelection('f')<CR>]], {silent = true, remap = false})
+-- keymap('v', '#', [[:call VisualSelection('b')<CR>]], {silent = true, remap = false})
+
+-- cope 
+keymap('n', "<leader>cc", [[:botright cope<cr>]], opts)
+keymap('n', "<leader>co", [[ggVGy:tabnew<cr>:set syntax=qf<cr>pgg]], opts)
+keymap('n', "<leader>n", [[:cn<cr>]], opts)
+keymap('n', "<leader>p", [[:cp<cr>]], opts)
 
