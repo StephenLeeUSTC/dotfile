@@ -52,6 +52,10 @@ keymap("v", ">", ">gv", opts)
 
 -- Plugins --
 
+-- treesitter fold
+keymap("n", "zz", ":foldclose<CR>", opts)
+keymap("n", "Z", ":foldopen<CR>", opts)
+
 -- NvimTree
 keymap("n", "<leader>nn", "<cmd>NvimTreeToggle<CR>", opts)
 

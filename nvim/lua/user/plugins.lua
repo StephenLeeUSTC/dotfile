@@ -44,9 +44,10 @@ return packer.startup(function(use)
   use { "wbthomason/packer.nvim" } -- Have packer manage itself
   use { "nvim-lua/plenary.nvim" } -- Useful lua functions used by lots of plugins
   use { "windwp/nvim-autopairs" } -- Autopairs, integrates with both cmp and treesitter
-  use { "JoosepAlviste/nvim-ts-context-commentstring" }
-  use { "numToStr/Comment.nvim" } -- use gcc to comment
-  use { "kyazdani42/nvim-web-devicons" }
+  use {
+    "numToStr/Comment.nvim",
+    requires = {"JoosepAlviste/nvim-ts-context-commentstring"}
+  } -- use gcc to comment
   use { "kyazdani42/nvim-tree.lua" }
   use { "akinsho/bufferline.nvim" }
   use { "moll/vim-bbye" }
@@ -55,7 +56,10 @@ return packer.startup(function(use)
   use { "ahmedkhalf/project.nvim" }
   use { "lewis6991/impatient.nvim" }
   use { "lukas-reineke/indent-blankline.nvim" }
-  use { "goolord/alpha-nvim" }
+  use {
+    "goolord/alpha-nvim",
+    requires = { 'kyazdani42/nvim-web-devicons' }
+  }
   use { "phaazon/hop.nvim" }
 
   -- Colorschemes
