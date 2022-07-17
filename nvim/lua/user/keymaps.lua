@@ -1,7 +1,7 @@
 -- Shorten function name
 local keymap = vim.keymap.set
 -- Silent keymap option
-local opts = { silent = true }
+local opts = { noremap = true, silent = true }
 
 --Remap space as leader key
 keymap("", "<Space>", "<Nop>", opts)
@@ -57,10 +57,11 @@ keymap("n", "<leader>nn", "<cmd>NvimTreeToggle<CR>", opts)
 
 -- Telescope
 keymap("n", "<leader>ff", "<cmd>Telescope find_files<cr>", opts)
-keymap("n", "<Leader>fr", ":Telescope oldfiles<CR>", { noremap = true, silent = true })
+keymap("n", "<Leader>fr", ":Telescope oldfiles<CR>", opts)
 keymap("n", "<leader>tt", "<cmd>Telescope live_grep<cr>", opts)
 keymap("n", "<leader>pp", "<cmd>Telescope projects<cr>", opts)
 keymap("n", "<leader>bf", "<cmd>Telescope buffers<CR>", opts)
+keymap("n", "<leader>sk", "<cmd>Telescope keymaps<CR>", opts)
 
 -- Hop
 keymap('n', 's', function()
@@ -80,10 +81,6 @@ keymap("v", "p", '"_dP', opts)
 
 -- compile and run 
 keymap('n', '<leader>cr', [[<cmd>lua require("user.utils").compile_run()<cr>]], opts)
-
--- visual mode mappings
--- keymap('v', '*', [[:call VisualSelection('f')<CR>]], {silent = true, remap = false})
--- keymap('v', '#', [[:call VisualSelection('b')<CR>]], {silent = true, remap = false})
 
 -- cope 
 keymap('n', "<leader>cc", [[:botright cope<cr>]], opts)
