@@ -60,6 +60,7 @@ keymap("n", "Z", ":foldopen<CR>", opts)
 keymap("n", "<leader>nn", "<cmd>NvimTreeToggle<CR>", opts)
 
 -- Telescope
+keymap("n", "<leader><leader>", "<cmd>Telescope find_files<cr>", opts)
 keymap("n", "<leader>ff", "<cmd>Telescope find_files<cr>", opts)
 keymap("n", "<Leader>fr", ":Telescope oldfiles<CR>", opts)
 keymap("n", "<leader>tt", "<cmd>Telescope live_grep<cr>", opts)
