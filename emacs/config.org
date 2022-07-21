@@ -1,0 +1,334 @@
+* Configuration
+** Packages
+Some general performance based improvements. Reset GC after init as it is maxed out in [[file:early-init.el][early init]].
+*** repos
+#+BEGIN_SRC elisp
+    (setq package-archives '(("gnu"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
+			     ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
+			     ("org"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")))
+
+    (package-initialize)        
+
+    (when (not package-archive-contents)
+    (package-refresh-contents))
+
+    ;;; Initialize use-package on non-linux platforms
+    (unless (package-installed-p 'use-package)       
+      (package-refresh-contents)
+      (package-install 'use-package))
+
+    (require 'use-package)                            
+
+    ;;; Make sure packages are downloaded and installed before they are run
+    ;;; also frees you from having to put :ensure t after installing EVERY PACKAGE.
+    (setq use-package-always-ensure t)
+#+END_SRC
+
+*** try
+#+BEGIN_SRC elisp
+  (use-package try
+  :ensure t)
+#+END_SRC
+
+*** Company
+#+BEGIN_SRC elisp
+  (use-package company
+  :bind (:map company-active-map
+         ("C-n" . company-select-next)
+         ("C-p" . company-select-previous))
+  :config
+  (setq company-idle-delay 0)
+  (setq company-minimum-prefix-length 3)
+  (global-company-mode t))
+#+END_SRC
+*** which-key
+Some help.
+#+BEGIN_SRC elisp
+(use-package which-key
+  :ensure t 
+  :config
+  (which-key-mode))
+#+END_SRC
+
+*** Yasnippet
+#+BEGIN_SRC elisp
+    (use-package yasnippet
+      :ensure t
+      :init
+        (yas-global-mode 1))
+
+;    (use-package yasnippet-snippets
+;      :ensure t)
+#+END_SRC
+
+*** Flycheck
+#+BEGIN_SRC elisp
+(use-package flycheck
+  :ensure t
+  :init
+  (global-flycheck-mode t))
+#+END_SRC
+
+*** Minibuffer
+#+BEGIN_SRC elisp
+  (use-package vertico
+  :config
+  (vertico-mode)
+  )
+
+  (use-package orderless
+  :config
+  (setq completion-styles '(orderless)))
+
+  (use-package marginalia
+  :config
+  (marginalia-mode))
+
+ (use-package embark
+   :ensure t
+
+   :bind
+   (("C-;" . embark-act)) 
+
+   :init
+   (setq prefix-help-command #'embark-prefix-help-command)
+
+   :config
+   (add-to-list 'display-buffer-alist
+		'("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+		  nil
+		  (window-parameters (mode-line-format . none)))))
+#+END_SRC
+*** Ace windows
+#+BEGIN_SRC ELISP
+(use-package ace-window
+:ensure t
+:init
+(progn
+(setq aw-scope 'global) ;; was frame
+(global-set-key (kbd "C-x O") 'other-frame)
+  (global-set-key [remap other-window] 'ace-window)
+  (custom-set-faces
+   '(aw-leading-char-face
+     ((t (:inherit ace-jump-face-foreground :height 3.0))))) 
+  ))
+#+END_SRC
+*** Swiper/Ivy/Counsel
+#+BEGIN_SRC elisp
+   (use-package counsel
+:ensure t
+  :bind
+  (("M-y" . counsel-yank-pop)
+   :map ivy-minibuffer-map
+   ("M-y" . ivy-next-line)))
+
+  (use-package ivy
+  :ensure t
+  :diminish (ivy-mode)
+  :bind (("C-x b" . ivy-switch-buffer))
+  :config
+  (ivy-mode 1)
+  (setq ivy-use-virtual-buffers t)
+  (setq ivy-count-format "%d/%d ")
+  (setq ivy-display-style 'fancy))
+
+  (use-package swiper
+  :ensure t
+  :bind (("C-s" . swiper-isearch)
+	 ("C-r" . swiper-isearch)
+	 ("C-c C-r" . ivy-resume)
+	 ("M-x" . counsel-M-x)
+	 ("C-x C-f" . counsel-find-file))
+  :config
+  (progn
+    (ivy-mode 1)
+    (setq ivy-use-virtual-buffers t)
+    (setq ivy-display-style 'fancy)
+    (define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
+    ))
+#+END_SRC
+** Utils
+#+BEGIN_SRC elisp
+  (defun open-init-file()
+   (interactive)
+   (find-file "~/.config/emacs/init.el"))
+#+END_SRC
+** UI
+#+BEGIN_SRC elisp
+
+;;; change cursor type
+(setq-default cursor-type 'bar)
+(show-paren-mode t)
+
+;;; close emacs's backup
+(setq make-backup-files nil)
+
+;;; 更改显示字体大小 14pt
+;;; http://stackoverflow.com/questions/294664/how-to-set-the-font-size-in-emacs
+(set-face-attribute 'default nil :height 140)
+
+(use-package vscode-dark-plus-theme
+  :ensure t
+  :config
+  (load-theme 'vscode-dark-plus t))
+
+#+END_SRC
+
+** Better-defaults
+#+BEGIN_SRC elisp
+(setq max-lisp-eval-depth 10000)
+(setq max-specpdl-size 10000)
+
+(global-auto-revert-mode t)
+
+(setq auto-save-default nil)
+
+(fset 'yes-or-no-p 'y-or-n-p)
+
+;;; 关闭工具栏
+(tool-bar-mode -1)
+  ;;; 显示行号
+(global-linum-mode 1)
+
+  ;;; highlight line
+(global-hl-line-mode 1)
+
+(setq inhibit-startup-message t)
+
+;;; 让鼠标滚动更好用
+(setq mouse-wheel-scroll-amount '(1 ((shift) . 1) ((control) . nil)))
+(setq mouse-wheel-progressive-speed nil)
+
+;;; delete the sletion when insert char
+(delete-selection-mode 1)
+#+END_SRC
+
+** Org mode
+#+BEGIN_SRC elisp
+      (use-package org 
+        :ensure t
+        :pin org)
+
+      (setenv "BROWSER" "firefox")
+      (use-package org-bullets
+        :ensure t
+        :config
+        (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+      (custom-set-variables
+       '(org-directory "~/OneDrive/orgfiles")
+       '(org-default-notes-file (concat org-directory "/notes.org"))
+       '(org-export-html-postamble nil)
+       '(org-hide-leading-stars t)
+       '(org-startup-folded (quote overview))
+       '(org-startup-indented t)
+       '(org-confirm-babel-evaluate nil)
+       '(org-src-fontify-natively t)
+       )
+
+      (global-set-key "\C-ca" 'org-agenda)
+      (setq org-agenda-start-on-weekday nil)
+      (setq org-agenda-custom-commands
+            '(("c" "Simple agenda view"
+               ((agenda "")
+                (alltodo "")))))
+
+      (global-set-key (kbd "C-c c") 'org-capture)
+
+      (setq org-agenda-files (list "~/OneDrive/orgfiles/gcal.org"
+                                   "~/OneDrive/orgfiles/soe-cal.org"
+                                   "~/OneDrive/orgfiles/i.org"
+                                   "~/OneDrive/orgfiles/schedule.org"))
+
+      (setq org-capture-templates
+            '(("a" "Appointment" entry (file  "~/OneDrive/orgfiles/gcal.org" )
+               "* %?\n\n%^T\n\n:PROPERTIES:\n\n:END:\n\n")
+              ("l" "Link" entry (file+headline "~/OneDrive/orgfiles/links.org" "Links")
+               "* %? %^L %^g \n%T" :prepend t)
+              ("b" "Blog idea" entry (file+headline "~/OneDrive/orgfiles/i.org" "Blog Topics:")
+               "* %?\n%T" :prepend t)
+              ("t" "To Do Item" entry (file+headline "~/OneDrive/orgfiles/i.org" "To Do and Notes")
+               "* TODO %?\n%u" :prepend t)
+              ("m" "Mail To Do" entry (file+headline "~/OneDrive/orgfiles/i.org" "To Do and Notes")
+               "* TODO %a\n %?" :prepend t)
+              ("g" "GMail To Do" entry (file+headline "~/OneDrive/orgfiles/i.org" "To Do and Notes")
+               "* TODO %^L\n %?" :prepend t)
+              ("n" "Note" entry (file+headline "~/OneDrive/orgfiles/i.org" "Notes")
+               "* %u %? " :prepend t)
+              ))
+  
+
+      (defadvice org-capture-finalize 
+          (after delete-capture-frame activate)  
+        "Advise capture-finalize to close the frame"  
+        (if (equal "capture" (frame-parameter nil 'name))  
+            (delete-frame)))
+
+      (defadvice org-capture-destroy 
+          (after delete-capture-frame activate)  
+        "Advise capture-destroy to close the frame"  
+        (if (equal "capture" (frame-parameter nil 'name))  
+            (delete-frame)))  
+
+      (use-package noflet
+        :ensure t )
+      (defun make-capture-frame ()
+        "Create a new frame and run org-capture."
+        (interactive)
+        (make-frame '((name . "capture")))
+        (select-frame-by-name "capture")
+        (delete-other-windows)
+        (noflet ((switch-to-buffer-other-window (buf) (switch-to-buffer buf)))
+          (org-capture)))
+  ;; (require 'ox-beamer)
+  ;; for inserting inactive dates
+      (define-key org-mode-map (kbd "C-c >") (lambda () (interactive (org-time-stamp-inactive))))
+
+      (use-package htmlize :ensure t)
+#+END_SRC
+
+** Keymaps
+*** Set Mac keys
+
+#+BEGIN_SRC elisp
+;;; the one config
+(setq mac-option-modifier 'meta
+ mac-command-modifier 'super)
+
+(global-set-key (kbd "s-a") 'mark-whole-buffer) ;;;对应Windows上面的Ctrl-a 全选
+(global-set-key (kbd "s-c") 'kill-ring-save) ;;;对应Windows上面的Ctrl-c 复制
+(global-set-key (kbd "s-s") 'save-buffer) ;;; 对应Windows上面的Ctrl-s 保存
+(global-set-key (kbd "s-v") 'yank) ;;;对应Windows上面的Ctrl-v 粘贴
+(global-set-key (kbd "s-z") 'undo) ;;;对应Windows上面的Ctrol-z 撤销
+(global-set-key (kbd "s-x") 'kill-region) ;;;对应Windows上面的Ctrol-x 剪切
+#+END_SRC
+
+*** Evil  
+
+#+BEGIN_SRC elisp
+;;; Vim Bindings
+(use-package evil
+  :demand t
+  :bind (("<escape>" . keyboard-escape-quit))
+  :init
+  ;; allows for using cgn
+  ;; (setq evil-search-module 'evil-search)
+  (setq evil-want-keybinding nil)
+  ;; no vim insert bindings
+  :config
+  (evil-mode 1))
+
+;;; Vim Bindings Everywhere else
+(use-package evil-collection
+  :after evil
+  :config
+  (setq evil-want-integration t)
+  (evil-collection-init))
+
+(use-package key-chord
+  :after evil 
+  :config
+  (key-chord-mode 1)
+  (key-chord-define evil-insert-state-map  "jk" 'evil-normal-state))
+#+END_SRC
+
+** Languages

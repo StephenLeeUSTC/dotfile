@@ -1,3 +1,0 @@
-* Personal emacs config
-
-Build it following [[http://book.emacs-china.org/][Learning Emacs in 21 Days]].
