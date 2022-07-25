@@ -241,14 +241,27 @@ Config emacs like vscode.
 ** Projectile
 #+BEGIN_SRC elisp
   (use-package projectile
-    :defer 0
-    :diminish projectile-mode
+    :ensure t
+    :hook (after-init . projectile-mode)
+    :bind (:map projectile-mode-map
+                ("C-c p" . projectile-command-map))
     :config
-    (setq projectile-completion-system 'ivy)
-    (projectile-global-mode)
-    :init
-    (setq projectile-project-search-path '("~/Workspace/" "~/Downloads/"))
-    (setq projectile-switch-project-action #'projectile-dired))
+    (dolist (dir '("bazel-bin"
+                   "bazel-out"
+                   "bazel-testlogs"))
+      (add-to-list 'projectile-globally-ignored-directories dir))
+    :custom
+    (projectile-use-git-grep t)
+    (projectile-project-search-path '("~/Workspace/" "~/Downloads/"))
+    (projectile-indexing-method 'alien)
+    (projectile-kill-buffers-filter 'kill-only-files)
+    ;; Ignore uninteresting files. It has no effect when using alien mode.
+    (projectile-globally-ignored-files '("TAGS" "tags" ".DS_Store"))
+    (projectile-globally-ignored-file-suffixes '(".elc" ".pyc" ".o" ".swp" ".so" ".a"))
+    (projectile-ignored-projects `("~/"
+                                   "/tmp/"
+                                   "/private/tmp/"
+                                   ,package-user-dir)))
 #+END_SRC
 
 ** Org mode
