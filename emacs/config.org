@@ -356,17 +356,15 @@ Config emacs like vscode.
 ** Magit
 #+BEGIN_SRC elisp
   (use-package magit
-    :config
-    (setq magit-completing-read-function 'ivy-completing-read)
-    :bind
-    ;; Magic
-    ("C-x g s" . magit-status)
-    ("C-x g x" . magit-checkout)
-    ("C-x g c" . magit-commit)
-    ("C-x g p" . magit-push)
-    ("C-x g u" . magit-pull)
-    ("C-x g e" . magit-ediff-resolve)
-    ("C-x g r" . magit-rebase-interactive))
+  :ensure t
+  :hook (git-commit-setup . git-commit-turn-on-flyspell)
+  :bind (("C-x g"   . magit-status)
+         ("C-x M-g" . magit-dispatch)
+         ("C-c M-g" . magit-file-dispatch))
+  :custom
+  (magit-diff-refine-hunk t)
+  (magit-diff-paint-whitespace nil)
+  (magit-ediff-dwim-show-on-hunks t))
 
   (use-package magit-popup)
 #+END_SRC
@@ -399,9 +397,6 @@ Config emacs like vscode.
       :global-prefix "C-SPC")
 
     (my/leader-keys
-      "t"  '(:ignore t :which-key "theme")
-      "tt" '(counsel-load-theme :which-key "choose theme")
-
       "p"  '(:ignore t :which-key "project")
       "pp" '(project-switch-project :which-key "choose project")
       "pc" '(projectile-command-map :which-key "choose action")
@@ -455,6 +450,8 @@ Config emacs like vscode.
   (use-package lsp-mode
     :init
     (setq lsp-keymap-prefix "C-c l")
+    :config
+    (lsp-enable-which-key-integration t)
     :hook ((python-mode . lsp-deferred)
            (c-mode . lsp-deferred)
            (c++-mode . lsp-deferred)
@@ -468,8 +465,6 @@ Config emacs like vscode.
     :hook (lsp-mode . lsp-ui-mode)
     :custom
     (lsp-ui-doc-position 'bottom))
-
-  (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
 
   (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
 
