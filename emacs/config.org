@@ -3,7 +3,9 @@ Some general performance based improvements. Reset GC after init as it is maxed 
 ** General basic
 Mac keys, options is meta, cmd is super.
 #+BEGIN_SRC elisp
-  ;;; the one config
+  ;; -*- lexical-binding: t -*-
+
+  ;;; change the key on mac.
   (setq mac-option-modifier 'meta
         mac-command-modifier 'super)
 
@@ -17,13 +19,14 @@ Mac keys, options is meta, cmd is super.
 
 Set default font size
 #+begin_src elisp
-  ;;; 更改显示字体大小 14pt
+  ;;; 更改显示字体大小 12pt
   ;;; http://stackoverflow.com/questions/294664/how-to-set-the-font-size-in-emacs
   (set-face-attribute 'default nil :height 120)
 #+end_src
 
-Set the package repos
+Set the package repos, mirror is from [[https://elpamirror.emacs-china.org/][Emacs China]].
 #+BEGIN_SRC elisp
+  (require 'package)
   (setq package-archives '(("gnu"   . "http://1.15.88.122/gnu/")
                            ("melpa" . "http://1.15.88.122/melpa/")
                            ("org"   . "http://1.15.88.122/org/")))
@@ -40,9 +43,12 @@ Set the package repos
 
   (require 'use-package)                            
 
+  ;;; Make sure packages are downloaded and installed before they are run
+  ;;; also frees you from having to put :ensure t after installing EVERY PACKAGE.
+  (setq use-package-always-ensure t)
 #+END_SRC
 
-Change some emacs default config
+Change some emacs default config.
 #+BEGIN_SRC elisp
   (setq max-lisp-eval-depth 10000)
   (setq max-specpdl-size 10000)
@@ -61,15 +67,11 @@ Change some emacs default config
   (setq mouse-wheel-scroll-amount '(1 ((shift) . 1) ((control) . nil)))
   (setq mouse-wheel-progressive-speed nil)
 
-  ;;; Make sure packages are downloaded and installed before they are run
-  ;;; also frees you from having to put :ensure t after installing EVERY PACKAGE.
-  (setq use-package-always-ensure t)
-
   ;;; change cursor type
   (setq-default cursor-type 'bar)
 
   ;;; Show matching parentheses
-  (show-paren-mode t)
+  (show-paren-mode 1)
 
   ;;; 关闭工具栏
   (tool-bar-mode -1)
@@ -97,14 +99,14 @@ Rainbow delimiters
 #+end_src
 
 ** Color theme
+Config emacs like vscode.
 #+BEGIN_SRC elisp
   (use-package vscode-dark-plus-theme
-    :ensure t
     :config
     (load-theme 'vscode-dark-plus t))
 #+END_SRC
 
-** Evil
+** Vim keybindings
 #+BEGIN_SRC elisp
   ;;; Vim Bindings
   (use-package evil
@@ -155,25 +157,17 @@ Rainbow delimiters
     :init
     (setq completion-styles '(orderless)))
 
-  (use-package company
-    :config
-    (setq company-idle-delay 0)
-    (setq company-minimum-prefix-length 3)
-    (global-company-mode t))
-
 
   (use-package embark
-    :ensure t
-
     :bind
-    (("C-." . embark-act)         ;; pick some comfortable binding
-     ("C-;" . embark-dwim)        ;; good alternative: M-.
+    (("C-;" . embark-act)         ;; pick some comfortable binding
+     ("C-." . embark-dwim)        ;; good alternative: M-.
      ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
 
     :init
 
     ;; Optionally replace the key help with a completing-read interface
-    (setq prefix-help-command #'embark-prefix-help-command)
+    (setq prefix-help-command 'embark-prefix-help-command)
 
     :config
 
@@ -185,9 +179,14 @@ Rainbow delimiters
 
     )
 
+  ;;; consult for search in file
+  (use-package consult
+    :bind
+    (("C-s" . consult-line))
+    )
+
   ;; Consult users will also want the embark-consult package.
   (use-package embark-consult
-    :ensure t
     :after (embark consult)
     :demand t ; only necessary if you have the hook below
     ;; if you want to have consult previews as you move around an
@@ -196,25 +195,8 @@ Rainbow delimiters
     (embark-collect-mode . consult-preview-at-point-mode))
 #+END_SRC
 
-** Ivy/Counsel/Swiper
+*** Company
 #+begin_src elisp
-  (use-package ivy
-    :bind
-    ("C-x s" . swiper)
-    ("C-x C-r" . ivy-resume)
-    :config
-    (ivy-mode 1)
-    (setq ivy-use-virtual-buffers nil)
-    (define-key read-expression-map (kbd "C-r") 'counsel-expression-history))
-
-  (use-package counsel
-    :bind
-    ("M-x" . counsel-M-x)
-                                          ; ("M-y" . counsel-yank-pop)
-    ("C-x C-m" . counsel-M-x)
-    ("C-x C-f" . counsel-fzf)
-    ("C-x c k" . counsel-yank-pop))
-
   (use-package company
     :after lsp-mode
     :hook (lsp-mode . company-mode)
@@ -234,13 +216,10 @@ Rainbow delimiters
 
   (use-package company-box
     :hook (company-mode . company-box-mode))
+#+end_src
 
-                                          ; (use-package ivy-posframe
-                                          ;   :config
-                                          ;   (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-center)))
-                                          ;   (ivy-posframe-mode 1))
-                                          ;   ; (when (display-graphic-p) (ivy-posframe-mode)))
-
+*** which key
+#+begin_src elisp
   (use-package which-key
     :defer 0
     :diminish which-key-mode
@@ -251,36 +230,20 @@ Rainbow delimiters
 
 ** Projectile
 #+BEGIN_SRC elisp
-  ;;; workspace.el --- Workspace configuration
-  ;;; Commentary:
-  ;; Set up workspace
-
-  ;;; Code:
-  ;; Set up projectile
   (use-package projectile
     :defer 0
     :diminish projectile-mode
     :config
     (setq projectile-completion-system 'ivy)
     (projectile-global-mode)
-                                          ; :bind-keymap
-                                          ; ("C-c p" . projectile-command-map)
     :init
-    (setq projectile-project-search-path '("~/Workspace/" "~/Workspace/cpp/"))
+    (setq projectile-project-search-path '("~/Workspace/" "~/Downloads/"))
     (setq projectile-switch-project-action #'projectile-dired))
-
-  (use-package counsel-projectile
-    :defer 0
-    :after projectile
-                                          ; :bind
-                                          ; ("C-SPC" . counsel-projectile-switch-project)
-    :config
-    (counsel-projectile-mode))
 #+END_SRC
 
 ** Org mode
 #+BEGIN_SRC elisp
-  (use-package ox-reveal :ensure t)
+  (use-package ox-reveal)
   (require 'org-protocol)
   (custom-set-variables
    '(org-directory "~/OneDrive/orgfiles")
@@ -296,7 +259,6 @@ Rainbow delimiters
 
 
   (use-package org-bullets
-    :ensure t
     :config
     (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 
@@ -334,7 +296,7 @@ Rainbow delimiters
   ;; babel stuff
   (require 'ob-clojure)
   (require 'ob-gnuplot)
-  (use-package ob-restclient :ensure t)
+  (use-package ob-restclient)
   (require 'ob-restclient)
   (setq org-babel-clojure-backend 'cider)
 
@@ -362,6 +324,8 @@ Rainbow delimiters
 
   (require 'ox-publish)
 
+  (require 'org-tempo)  ;开启easy template
+
   (setq org-refile-targets '((nil :maxlevel . 2)))
 
 #+END_SRC
@@ -385,7 +349,7 @@ Rainbow delimiters
 #+END_SRC
 
 ** Splash
-#+begin_src elisp
+#+BEGIN_SRC emacs-lisp
   ;;; Dependencies
   (use-package page-break-lines)
   (use-package all-the-icons)
@@ -393,10 +357,11 @@ Rainbow delimiters
   (use-package dashboard
     :config
     (setq show-week-agenda-p t)
-    (setq dashboard-items '((recents . 15) (agenda . 5)))
+    (setq dashboard-items '((recents . 15) (projects . 5) (agenda . 5)))
     (setq dashboard-set-heading-icons t)
     (setq dashboard-set-file-icons t)
     (setq dashboard-startup-banner 3)
+    (setq dashboard-center-content t)
     (dashboard-setup-startup-hook)
     )
 #+end_src
@@ -415,28 +380,24 @@ Rainbow delimiters
       "tt" '(counsel-load-theme :which-key "choose theme")
 
       "p"  '(:ignore t :which-key "project")
-      "pp" '(counsel-projectile-switch-project :which-key "choose project")
+      "pp" '(project-switch-project :which-key "choose project")
       "pc" '(projectile-command-map :which-key "choose action")
 
-      "f"  '(:ignore t :which-key "find")
-      "ff" '(counsel-fzf :which-key "fuzzy find")
-      "fb" '(switch-to-buffer :which-key "switch buffer")
-      "fx" '(counsel-M-x :which-key "M-x")
+      "f"  '(:ignore t :which-key "file")
+      "ff" '(find-file :which-key "find file")
       "ft" '(treemacs :which-key "treemacs")
       "fd" '(dired :which-key "dired")
-      "fr" '(revert-buffer :which-key "revert-buffer")
       "fs" '(save-buffer :which-key "save-buffer")
+      "fr" '(consult-recent-file :which-key "recent file")
       "fm" '(imenu :which-key "imenu")
+
+      "b" '(:ignore t :which-key "buffer")
+      "bb" '(switch-to-buffer :which-key "switch buffer")
+      "bd" '(ido-kill-buffer :which-key "kill buffer")
+      "br" '(revert-buffer :which-key "revert-buffer")
 
       "g"  '(:ignore t :which-key "git")
       "gs" '(magit-status :which-key "git status")
-
-      "d"  '(:ignore t :which-key "debug")
-      "dd" '(dap-debug :which-key "start debugging")
-      "dba" '(dap-breakpoint-add :which-key "add breakpoint")
-      "dbd" '(dap-breakpoint-delete :which-key "delete breakpoint")
-      "dr" '(dap-ui-repl :which-key "repl")
-      "du" '(dap-ui-mode :which-key "ui")
 
       "h"  '(:ignore t :which-key "helpful")
       "hv" '(helpful-variable :which-key "helpful variable")
@@ -509,7 +470,7 @@ Rainbow delimiters
 
 #+END_SRC
 
-*** Python
+** Python
 #+begin_src elisp
   (use-package lsp-pyright
     :hook (python-mode . (lambda ()
@@ -542,7 +503,7 @@ Rainbow delimiters
     :custom (blacken-line-length 79))
 #+end_src
 
-*** C/C++
+** C/C++
 #+BEGIN_SRC elisp
   (use-package google-c-style
     :config
