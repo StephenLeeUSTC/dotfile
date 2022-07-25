@@ -127,6 +127,16 @@ Config emacs like vscode.
     (key-chord-mode 1)
     (setq key-chord-two-keys-delay 0.5)
     (key-chord-define evil-insert-state-map  "jk" 'evil-normal-state))
+
+  (use-package evil-surround
+  :hook (after-init . global-evil-surround-mode))
+
+  (use-package evil-collection
+  :hook (evil-mode . evil-collection-init)
+  :custom
+  (evil-collection-calendar-want-org-bindings t)
+  (evil-collection-outline-bind-tab-p nil)
+  (evil-collection-setup-debugger-keys nil))
 #+END_SRC
 
 ** Completion frameworks
